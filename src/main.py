@@ -24,3 +24,9 @@ for period, data in annual_report.items():
     print(f"{period}: Income = {data['Income']}, Expense = {data['Expense']}")
 
 manager.plot_report(monthly_report, 'monthly')
+
+detailed_monthly_report = manager.generate_detailed_report('monthly')
+for period, categories in detailed_monthly_report.items():
+    print(f"{period}:")
+    for category, data in categories.items():
+        print(f"  {category}: Income = {data['Income']}, Expense = {data['Expense']}")

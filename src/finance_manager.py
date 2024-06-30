@@ -49,3 +49,18 @@ class FinanceManager:
         plt.title(f'{period.capitalize()} Report')
         plt.legend()
         plt.show()
+
+    def generate_detailed_report(self, period='monthly'):
+            transactions = self.get_transactions()
+            report = defaultdict(lambda: defaultdict(lambda: {'Income': 0, 'Expense': 0}))
+
+            for transaction in transactions:
+                date, category, amount, type = transaction
+                if period == 'monthly':
+                    key = date[:7]  # YYYY-MM
+                else:
+                    key = date[:4]  # YYYY
+
+                report[key][category][type] += float(amount)
+
+            return report
