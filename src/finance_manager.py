@@ -1,6 +1,7 @@
 import csv
 from datetime import datetime
 from collections import defaultdict
+import matplotlib.pyplot as plt
 
 
 class FinanceManager:
@@ -34,3 +35,17 @@ class FinanceManager:
             report[key][type] += float(amount)
 
         return report
+    
+    def plot_report(self, report, period='monthly'):
+        periods = sorted(report.keys())
+        incomes = [report[period]['Income'] for period in periods]
+        expenses = [report[period]['Expense'] for period in periods]
+
+        plt.figure(figsize=(10, 5))
+        plt.plot(periods, incomes, label='Income')
+        plt.plot(periods, expenses, label='Expense')
+        plt.xlabel('Period')
+        plt.ylabel('Amount')
+        plt.title(f'{period.capitalize()} Report')
+        plt.legend()
+        plt.show()

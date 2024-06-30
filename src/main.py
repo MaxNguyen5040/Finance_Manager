@@ -1,4 +1,3 @@
-# src/main.py
 from finance_manager import FinanceManager
 from datetime import datetime
 
@@ -23,3 +22,5 @@ for period, data in monthly_report.items():
 annual_report = manager.generate_report('annual')
 for period, data in annual_report.items():
     print(f"{period}: Income = {data['Income']}, Expense = {data['Expense']}")
+
+manager.plot_report(monthly_report, 'monthly')
