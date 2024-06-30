@@ -1,5 +1,7 @@
 import csv
 from datetime import datetime
+from collections import defaultdict
+
 
 class FinanceManager:
     def __init__(self, data_file):
@@ -17,3 +19,18 @@ class FinanceManager:
             for row in reader:
                 transactions.append(row)
         return transactions
+
+    def generate_report(self, period='monthly'):
+        transactions = self.get_transactions()
+        report = defaultdict(lambda: {'Income': 0, 'Expense': 0})
+
+        for transaction in transactions:
+            date, category, amount, type = transaction
+            if period == 'monthly':
+                key = date[:7]  # YYYY-MM
+            else:
+                key = date[:4]  # YYYY
+
+            report[key][type] += float(amount)
+
+        return report

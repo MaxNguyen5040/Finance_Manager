@@ -14,3 +14,12 @@ transactions = manager.get_transactions()
 for transaction in transactions:
     print(transaction)
 
+# Generate monthly report
+monthly_report = manager.generate_report('monthly')
+for period, data in monthly_report.items():
+    print(f"{period}: Income = {data['Income']}, Expense = {data['Expense']}")
+
+# Generate annual report
+annual_report = manager.generate_report('annual')
+for period, data in annual_report.items():
+    print(f"{period}: Income = {data['Income']}, Expense = {data['Expense']}")
