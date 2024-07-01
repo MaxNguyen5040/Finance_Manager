@@ -38,15 +38,10 @@ import pytest
 
 manager = FinanceManager('config.yaml')
 
-try:
-    # Add valid transaction
-    manager.add_transaction(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'Salary', 5000, 'Income')
-    # Add invalid transaction
-    manager.add_transaction(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'Groceries', 'invalid_amount', 'Expense')
-except (InvalidTransactionTypeError, InvalidAmountError, InvalidDateError) as e:
-    print(f"Error: {e}")
+manager.add_transaction(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'Salary', 5000, 'Income', 'USD')
+manager.add_transaction(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'Freelance', 4000, 'Income', 'EUR')
+manager.add_transaction(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'Groceries', -150, 'Expense', 'GBP')
 
-# Print all transactions
 transactions = manager.get_transactions()
 for transaction in transactions:
     print(transaction)

@@ -1,1 +1,2 @@
 data_file: 'data/transactions.csv'
+base_currency: 'USD'

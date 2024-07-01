@@ -6,6 +6,7 @@ from datetime import datetime
 import matplotlib.pyplot as plt
 import logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+import forex_python.converter
 
 class InvalidTransactionTypeError(Exception):
     pass
@@ -22,9 +23,13 @@ class FinanceManager:
         with open(config_file, 'r') as file:
             config = yaml.safe_load(file)
         self.data_file = config['data_file']
+        self.base_currency = config.get('base_currency', 'USD')
+        self.converter = forex_python.converter.CurrencyRates()
 
     def add_transaction(self, date, category, amount, type):
-        logging.info(f'Adding transaction: {date}, {category}, {amount}, {type}')
+        logging.info(f'Adding transaction: {date}, {category}, {amount}, {type}, {currency}')
+        if currency != self.base_currency:
+            amount = self.converter.convert(currency, self.base_currency, amount)
         if type not in ['Income', 'Expense']:
             raise InvalidTransactionTypeError("Type must be 'Income' or 'Expense'")
         if not isinstance(amount, (int, float)):
