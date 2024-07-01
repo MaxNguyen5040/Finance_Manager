@@ -1,9 +1,9 @@
+# src/finance_manager.py
 import csv
-from datetime import datetime
-from collections import defaultdict
-import matplotlib.pyplot as plt
 import yaml
-
+from collections import defaultdict
+from datetime import datetime
+import matplotlib.pyplot as plt
 
 class FinanceManager:
     def __init__(self, config_file):
@@ -12,16 +12,20 @@ class FinanceManager:
         self.data_file = config['data_file']
 
     def add_transaction(self, date, category, amount, type):
+        if type not in ['Income', 'Expense']:
+            raise ValueError("Type must be 'Income' or 'Expense'")
+        if not isinstance(amount, (int, float)):
+            raise ValueError("Amount must be a number")
+        if not isinstance(date, str):
+            raise ValueError("Date must be a string in YYYY-MM-DD HH:MM:SS format")
+        try:
+            datetime.strptime(date, '%Y-%m-%d %H:%M:%S')
+        except ValueError:
+            raise ValueError("Date format is incorrect")
+
         with open(self.data_file, 'a', newline='') as file:
             writer = csv.writer(file)
             writer.writerow([date, category, amount, type])
-
-    def import_transactions(self, import_file):
-        with open(import_file, 'r') as file:
-            reader = csv.reader(file)
-            for row in reader:
-                date, category, amount, type = row
-                self.add_transaction(date, category, float(amount), type)
 
     def get_transactions(self):
         transactions = []
@@ -45,7 +49,22 @@ class FinanceManager:
             report[key][type] += float(amount)
 
         return report
-    
+
+    def generate_detailed_report(self, period='monthly'):
+        transactions = self.get_transactions()
+        report = defaultdict(lambda: defaultdict(lambda: {'Income': 0, 'Expense': 0}))
+
+        for transaction in transactions:
+            date, category, amount, type = transaction
+            if period == 'monthly':
+                key = date[:7]  # YYYY-MM
+            else:
+                key = date[:4]  # YYYY
+
+            report[key][category][type] += float(amount)
+
+        return report
+
     def plot_report(self, report, period='monthly'):
         periods = sorted(report.keys())
         incomes = [report[period]['Income'] for period in periods]
@@ -60,33 +79,9 @@ class FinanceManager:
         plt.legend()
         plt.show()
 
-    def generate_detailed_report(self, period='monthly'):
-            transactions = self.get_transactions()
-            report = defaultdict(lambda: defaultdict(lambda: {'Income': 0, 'Expense': 0}))
-
-            for transaction in transactions:
-                date, category, amount, type = transaction
-                if period == 'monthly':
-                    key = date[:7]  # YYYY-MM
-                else:
-                    key = date[:4]  # YYYY
-
-                report[key][category][type] += float(amount)
-
-            return report
-    
-    def add_transaction(self, date, category, amount, type):
-        if type not in ['Income', 'Expense']:
-            raise ValueError("Type must be 'Income' or 'Expense'")
-        if not isinstance(amount, (int, float)):
-            raise ValueError("Amount must be a number")
-        if not isinstance(date, str):
-            raise ValueError("Date must be a string in YYYY-MM-DD HH:MM:SS format")
-        try:
-            datetime.strptime(date, '%Y-%m-%d %H:%M:%S')
-        except ValueError:
-            raise ValueError("Date format is incorrect")
-
-        with open(self.data_file, 'a', newline='') as file:
-            writer = csv.writer(file)
-            writer.writerow([date, category, amount, type])
+    def import_transactions(self, import_file):
+        with open(import_file, 'r') as file:
+            reader = csv.reader(file)
+            for row in reader:
+                date, category, amount, type = row
+                self.add_transaction(date, category, float(amount), type)
