@@ -1,8 +1,27 @@
 from user_manager import UserManager
 from functools import wraps
 from flask import session
+import io
+import base64
+from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 
 user_manager = UserManager('data/users.csv')
+
+@app.route('/plot/expense-trend')
+@login_required
+def plot_expense_trend():
+    fig = manager.plot_expense_trend()
+    output = io.BytesIO()
+    FigureCanvas(fig).print_png(output)
+    return base64.b64encode(output.getvalue()).decode('utf8')
+
+@app.route('/plot/income-trend')
+@login_required
+def plot_income_trend():
+    fig = manager.plot_income_trend()
+    output = io.BytesIO()
+    FigureCanvas(fig).print_png(output)
+    return base64.b64encode(output.getvalue()).decode('utf8')
 
 def login_required(f):
     @wraps(f)
