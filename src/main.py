@@ -3,16 +3,6 @@ from datetime import datetime
 import os
 import pytest
 
-manager = FinanceManager('config.yaml')
-
-# Import transactions from another CSV file
-manager.import_transactions('data/import_transactions.csv')
-
-# Print all transactions
-transactions = manager.get_transactions()
-for transaction in transactions:
-    print(transaction)
-
 # # Generate monthly report
 # monthly_report = manager.generate_report('monthly')
 # for period, data in monthly_report.items():
@@ -46,9 +36,17 @@ for transaction in transactions:
 #     with pytest.raises(ValueError):
 #         manager.add_transaction(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'Groceries', 'invalid_amount', 'Expense')
 
-manager.add_transaction(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'Salary', 5000, 'Income')
-manager.add_transaction(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'Groceries', -150, 'Expense')
+manager = FinanceManager('config.yaml')
 
+try:
+    # Add valid transaction
+    manager.add_transaction(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'Salary', 5000, 'Income')
+    # Add invalid transaction
+    manager.add_transaction(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'Groceries', 'invalid_amount', 'Expense')
+except (InvalidTransactionTypeError, InvalidAmountError, InvalidDateError) as e:
+    print(f"Error: {e}")
+
+# Print all transactions
 transactions = manager.get_transactions()
 for transaction in transactions:
     print(transaction)
