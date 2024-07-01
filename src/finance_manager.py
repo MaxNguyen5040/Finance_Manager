@@ -2,11 +2,14 @@ import csv
 from datetime import datetime
 from collections import defaultdict
 import matplotlib.pyplot as plt
+import yaml
 
 
 class FinanceManager:
-    def __init__(self, data_file):
-        self.data_file = data_file
+    def __init__(self, config_file):
+        with open(config_file, 'r') as file:
+            config = yaml.safe_load(file)
+        self.data_file = config['data_file']
 
     def add_transaction(self, date, category, amount, type):
         with open(self.data_file, 'a', newline='') as file:
