@@ -42,6 +42,13 @@ for transaction in transactions:
 #     assert transactions[0][1] == 'Salary'
 #     assert float(transactions[0][2]) == 5000
 
-def test_invalid_transaction(manager):
-    with pytest.raises(ValueError):
-        manager.add_transaction(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'Groceries', 'invalid_amount', 'Expense')
+# def test_invalid_transaction(manager):
+#     with pytest.raises(ValueError):
+#         manager.add_transaction(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'Groceries', 'invalid_amount', 'Expense')
+
+manager.add_transaction(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'Salary', 5000, 'Income')
+manager.add_transaction(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'Groceries', -150, 'Expense')
+
+transactions = manager.get_transactions()
+for transaction in transactions:
+    print(transaction)

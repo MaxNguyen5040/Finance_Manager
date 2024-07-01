@@ -4,10 +4,13 @@ import yaml
 from collections import defaultdict
 from datetime import datetime
 import matplotlib.pyplot as plt
+import logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 
 class FinanceManager:
     def __init__(self, config_file):
+        logging.info('Initializing FinanceManager')
         with open(config_file, 'r') as file:
             config = yaml.safe_load(file)
         self.data_file = config['data_file']
@@ -103,3 +106,20 @@ class FinanceManager:
         plt.pie(categories.values(), labels=categories.keys(), autopct='%1.1f%%')
         plt.title('Expense Categories')
         plt.show()
+
+    def add_transaction(self, date, category, amount, type):
+        logging.info(f'Adding transaction: {date}, {category}, {amount}, {type}')
+        if type not in ['Income', 'Expense']:
+            raise ValueError("Type must be 'Income' or 'Expense'")
+        if not isinstance(amount, (int, float)):
+            raise ValueError("Amount must be a number")
+        if not isinstance(date, str):
+            raise ValueError("Date must be a string in YYYY-MM-DD HH:MM:SS format")
+        try:
+            datetime.strptime(date, '%Y-%m-%d %H:%M:%S')
+        except ValueError:
+            raise ValueError("Date format is incorrect")
+
+        with open(self.data_file, 'a', newline='') as file:
+            writer = csv.writer(file)
+            writer.writerow([date, category, amount, type])
