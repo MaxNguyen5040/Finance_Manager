@@ -1,5 +1,7 @@
 from finance_manager import FinanceManager
 from datetime import datetime
+import os
+import pytest
 
 manager = FinanceManager('config.yaml')
 
@@ -29,16 +31,17 @@ for transaction in transactions:
 #     for category, data in categories.items():
 #         print(f"  {category}: Income = {data['Income']}, Expense = {data['Expense']}")
 
+@pytest.fixture
+def manager():
+    return FinanceManager('data/test_transactions.csv')
 
-try:
-    # Add valid transaction
+def test_add_transaction(manager):
     manager.add_transaction(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'Salary', 5000, 'Income')
-    # Add invalid transaction
-    manager.add_transaction(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'Groceries', 'invalid_amount', 'Expense')
-except ValueError as e:
-    print(f"Error: {e}")
+    transactions = manager.get_transactions()
+    assert len(transactions) == 1
+    assert transactions[0][1] == 'Salary'
+    assert float(transactions[0][2]) == 5000
 
-# Print all transactions
-transactions = manager.get_transactions()
-for transaction in transactions:
-    print(transaction)
+def test_invalid_transaction(manager):
+    with pytest.raises(ValueError):
+        manager.add_transaction(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'Groceries', 'invalid_amount', 'Expense')
