@@ -1,3 +1,4 @@
+<!-- flask_app/templates/index.html -->
 <!doctype html>
 <html lang="en">
 <head>
@@ -8,6 +9,7 @@
 </head>
 <body>
     <h1>Finance Manager</h1>
+    <a href="{{ url_for('logout') }}">Logout</a>
     <form action="{{ url_for('add_transaction') }}" method="POST">
         <input type="text" name="category" placeholder="Category" required>
         <input type="number" name="amount" placeholder="Amount" required>
@@ -18,11 +20,16 @@
         <input type="text" name="currency" placeholder="Currency (e.g., USD)" required>
         <button type="submit">Add Transaction</button>
     </form>
+    <h2>Transactions</h2>
     <ul>
         {% for transaction in transactions %}
         <li>{{ transaction[0] }} - {{ transaction[1] }} - {{ transaction[2] }} - {{ transaction[3] }}</li>
         {% endfor %}
     </ul>
+    <h2>Expense Trend</h2>
+    <img src="data:image/png;base64,{{ plot_expense_trend() }}" alt="Expense Trend">
+    <h2>Income Trend</h2>
+    <img src="data:image/png;base64,{{ plot_income_trend() }}" alt="Income Trend">
     {% with messages = get_flashed_messages() %}
         {% if messages %}
             <ul>
