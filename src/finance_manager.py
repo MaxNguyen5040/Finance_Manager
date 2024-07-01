@@ -64,3 +64,19 @@ class FinanceManager:
                 report[key][category][type] += float(amount)
 
             return report
+    
+    def add_transaction(self, date, category, amount, type):
+        if type not in ['Income', 'Expense']:
+            raise ValueError("Type must be 'Income' or 'Expense'")
+        if not isinstance(amount, (int, float)):
+            raise ValueError("Amount must be a number")
+        if not isinstance(date, str):
+            raise ValueError("Date must be a string in YYYY-MM-DD HH:MM:SS format")
+        try:
+            datetime.strptime(date, '%Y-%m-%d %H:%M:%S')
+        except ValueError:
+            raise ValueError("Date format is incorrect")
+
+        with open(self.data_file, 'a', newline='') as file:
+            writer = csv.writer(file)
+            writer.writerow([date, category, amount, type])
