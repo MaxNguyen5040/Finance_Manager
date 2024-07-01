@@ -5,6 +5,7 @@ from collections import defaultdict
 from datetime import datetime
 import matplotlib.pyplot as plt
 
+
 class FinanceManager:
     def __init__(self, config_file):
         with open(config_file, 'r') as file:
@@ -85,3 +86,20 @@ class FinanceManager:
             for row in reader:
                 date, category, amount, type = row
                 self.add_transaction(date, category, float(amount), type)
+
+    def plot_expense_categories(self, period='monthly'):
+        transactions = self.get_transactions()
+        categories = defaultdict(float)
+
+        for transaction in transactions:
+            date, category, amount, type = transaction
+            if type == 'Expense':
+                if period == 'monthly' and date.startswith(period):
+                    categories[category] += float(amount)
+                elif period == 'annual' and date.startswith(period):
+                    categories[category] += float(amount)
+
+        plt.figure(figsize=(10, 5))
+        plt.pie(categories.values(), labels=categories.keys(), autopct='%1.1f%%')
+        plt.title('Expense Categories')
+        plt.show()
