@@ -16,6 +16,13 @@ class FinanceManager:
             writer = csv.writer(file)
             writer.writerow([date, category, amount, type])
 
+    def import_transactions(self, import_file):
+        with open(import_file, 'r') as file:
+            reader = csv.reader(file)
+            for row in reader:
+                date, category, amount, type = row
+                self.add_transaction(date, category, float(amount), type)
+
     def get_transactions(self):
         transactions = []
         with open(self.data_file, 'r') as file:

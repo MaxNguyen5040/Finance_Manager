@@ -1,10 +1,10 @@
 from finance_manager import FinanceManager
 from datetime import datetime
 
-manager = FinanceManager('data/transactions.csv')
+manager = FinanceManager('config.yaml')
 
-manager.add_transaction(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'Salary', 5000, 'Income')
-manager.add_transaction(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'Groceries', -150, 'Expense')
+# Import transactions from another CSV file
+manager.import_transactions('data/import_transactions.csv')
 
 # Print all transactions
 transactions = manager.get_transactions()
