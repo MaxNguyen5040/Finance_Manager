@@ -1,21 +1,33 @@
-import bcrypt
-import csv
+import json
 
 class UserManager:
     def __init__(self, user_file):
         self.user_file = user_file
+        self.users = self.load_users()
 
-    def create_user(self, username, password):
-        hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
-        with open(self.user_file, 'a', newline='') as file:
-            writer = csv.writer(file)
-            writer.writerow([username, hashed_password.decode('utf-8')])
+    def load_users(self):
+        try:
+            with open(self.user_file, 'r') as f:
+                return json.load(f)
+        except FileNotFoundError:
+            return {}
+
+    def save_users(self):
+        with open(self.user_file, 'w') as f:
+            json.dump(self.users, f)
+
+    def add_user(self, username, password):
+        if username in self.users:
+            raise ValueError('User already exists')
+        self.users[username] = {'password': password, 'settings': {}}
+        self.save_users()
 
     def authenticate_user(self, username, password):
-        with open(self.user_file, 'r') as file:
-            reader = csv.reader(file)
-            for row in reader:
-                stored_username, stored_password = row
-                if stored_username == username and bcrypt.checkpw(password.encode('utf-8'), stored_password.encode('utf-8')):
-                    return True
-        return False
+        return self.users.get(username, {}).get('password') == password
+
+    def get_user_settings(self, username):
+        return self.users.get(username, {}).get('settings', {})
+
+    def update_user_settings(self, username, settings):
+        self.users[username]['settings'] = settings
+        self.save_users()

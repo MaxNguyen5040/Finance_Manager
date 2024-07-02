@@ -121,3 +121,21 @@ def plot_income_trend():
     else:
         flash('No income data to plot.')
         return redirect(url_for('index'))
+
+@app.route('/profile')
+@login_required
+def profile():
+    username = session['username']
+    settings = user_manager.get_user_settings(username)
+    return render_template('profile.html', settings=settings)
+
+@app.route('/update-settings', methods=['POST'])
+@login_required
+def update_settings():
+    username = session['username']
+    settings = {
+        'preferred_currency': request.form['preferred_currency']
+    }
+    user_manager.update_user_settings(username, settings)
+    flash('Settings updated successfully!')
+    return redirect(url_for('profile'))
