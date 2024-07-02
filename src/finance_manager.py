@@ -6,7 +6,8 @@ from datetime import datetime
 import matplotlib.pyplot as plt
 import logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
-import forex_python.converter
+import pandas as pd
+
 
 class InvalidTransactionTypeError(Exception):
     pass
@@ -19,69 +20,25 @@ class InvalidDateError(Exception):
 
 class FinanceManager:
     def __init__(self, config_file):
-        logging.info('Initializing FinanceManager')
-        with open(config_file, 'r') as file:
-            config = yaml.safe_load(file)
-        self.data_file = config['data_file']
-        self.base_currency = config.get('base_currency', 'USD')
-        self.converter = forex_python.converter.CurrencyRates()
-
-    def add_transaction(self, date, category, amount, type):
-        logging.info(f'Adding transaction: {date}, {category}, {amount}, {type}, {currency}')
-        if currency != self.base_currency:
-            amount = self.converter.convert(currency, self.base_currency, amount)
-        if type not in ['Income', 'Expense']:
-            raise InvalidTransactionTypeError("Type must be 'Income' or 'Expense'")
-        if not isinstance(amount, (int, float)):
-            raise InvalidAmountError("Amount must be a number")
-        if not isinstance(date, str):
-            raise InvalidDateError("Date must be a string in YYYY-MM-DD HH:MM:SS format")
+        self.config_file = config_file
+        self.transactions = {}
+    
+    def load_user_transactions(self, username):
         try:
-            datetime.strptime(date, '%Y-%m-%d %H:%M:%S')
-        except ValueError:
-            raise InvalidDateError("Date format is incorrect")
+            self.transactions[username] = pd.read_csv(f'data/{username}_transactions.csv')
+        except FileNotFoundError:
+            self.transactions[username] = pd.DataFrame(columns=['date', 'category', 'amount', 'type', 'currency'])
 
-        with open(self.data_file, 'a', newline='') as file:
-            writer = csv.writer(file)
-            writer.writerow([date, category, amount, type])
+    def save_user_transactions(self, username):
+        self.transactions[username].to_csv(f'data/{username}_transactions.csv', index=False)
 
-    def get_transactions(self):
-        transactions = []
-        with open(self.data_file, 'r') as file:
-            reader = csv.reader(file)
-            for row in reader:
-                transactions.append(row)
-        return transactions
-
-    def generate_report(self, period='monthly'):
-        transactions = self.get_transactions()
-        report = defaultdict(lambda: {'Income': 0, 'Expense': 0})
-
-        for transaction in transactions:
-            date, category, amount, type = transaction
-            if period == 'monthly':
-                key = date[:7]  # YYYY-MM
-            else:
-                key = date[:4]  # YYYY
-
-            report[key][type] += float(amount)
-
-        return report
-
-    def generate_detailed_report(self, period='monthly'):
-        transactions = self.get_transactions()
-        report = defaultdict(lambda: defaultdict(lambda: {'Income': 0, 'Expense': 0}))
-
-        for transaction in transactions:
-            date, category, amount, type = transaction
-            if period == 'monthly':
-                key = date[:7]  # YYYY-MM
-            else:
-                key = date[:4]  # YYYY
-
-            report[key][category][type] += float(amount)
-
-        return report
+    def add_transaction(self, username, date, category, amount, type, currency):
+        new_transaction = pd.DataFrame([[date, category, amount, type, currency]], columns=['date', 'category', 'amount', 'type', 'currency'])
+        self.transactions[username] = pd.concat([self.transactions[username], new_transaction], ignore_index=True)
+        self.save_user_transactions(username)
+    
+    def get_transactions(self, username):
+        return self.transactions.get(username, pd.DataFrame(columns=['date', 'category', 'amount', 'type', 'currency']))
 
     def plot_report(self, report, period='monthly'):
         periods = sorted(report.keys())
