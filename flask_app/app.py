@@ -126,3 +126,22 @@ def register():
         except ValueError as e:
             flash(str(e))
     return render_template('register.html')
+
+@app.route('/reset-password', methods=['GET', 'POST'])
+def reset_password():
+    if request.method == 'POST':
+        username = request.form['username']
+        new_password = request.form['new_password']
+        confirm_password = request.form['confirm_password']
+
+        if not new_password or not confirm_password or new_password != confirm_password:
+            flash('Passwords do not match or are empty!')
+            return redirect(url_for('reset_password'))
+
+        try:
+            user_manager.reset_password(username, new_password)
+            flash('Password reset successful! Please log in.')
+            return redirect(url_for('login'))
+        except ValueError as e:
+            flash(str(e))
+    return render_template('reset_password.html')

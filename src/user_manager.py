@@ -1,4 +1,6 @@
 import json
+import uuid
+
 bcrypt = Bcrypt()
 
 class UserManager:
@@ -35,4 +37,11 @@ class UserManager:
 
     def update_user_settings(self, username, settings):
         self.users[username]['settings'] = settings
+        self.save_users()
+
+    def reset_password(self, username, new_password):
+        if username not in self.users:
+            raise ValueError('User does not exist')
+        hashed_password = bcrypt.generate_password_hash(new_password).decode('utf-8')
+        self.users[username]['password'] = hashed_password
         self.save_users()
