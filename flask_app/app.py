@@ -191,3 +191,31 @@ def send_email(subject, recipients, body):
     msg = Message(subject, sender=app.config['MAIL_USERNAME'], recipients=recipients)
     msg.body = body
     mail.send(msg)
+
+def convert_currency(self, amount, from_currency, to_currency='USD'):
+        if from_currency == to_currency:
+            return amount
+        return self.currency_rates.convert(from_currency, to_currency, amount)
+
+@app.route('/add', methods=['POST'])
+@login_required
+def add_transaction():
+    username = session['username']
+    date = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    category = request.form['category']
+    amount = request.form['amount']
+    type = request.form['type']
+    currency = request.form['currency']
+
+    if not category or not amount or not type or not currency:
+        flash('All fields are required!')
+        return redirect(url_for('index'))
+
+    try:
+        amount = float(amount)
+        amount_in_usd = manager.convert_currency(amount, currency, 'USD')
+        manager.add_transaction(username, date, category, amount_in_usd, type, 'USD')
+        flash('Transaction added successfully!')
+    except ValueError as e:
+        flash(str(e))
+    return redirect(url_for('index'))
