@@ -4,7 +4,6 @@ from flask import session
 import io
 import base64
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
-
 user_manager = UserManager('data/users.csv')
 
 def login_required(f):
@@ -145,3 +144,15 @@ def reset_password():
         except ValueError as e:
             flash(str(e))
     return render_template('reset_password.html')
+
+@app.route('/export', methods=['GET'])
+@login_required
+def export_transactions():
+    username = session['username']
+    try:
+        filename = f"{username}_transactions.csv"
+        manager.export_transactions(username, filename)
+        return send_file(filename, as_attachment=True)
+    except ValueError as e:
+        flash(str(e))
+        return redirect(url_for('index'))

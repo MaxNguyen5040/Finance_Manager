@@ -126,3 +126,13 @@ class FinanceManager:
         plt.grid(True)
         plt.tight_layout()
         return plt.gcf()
+    
+    def export_transactions(self, username, filename='transactions.csv'):
+        if username not in self.transactions:
+            raise ValueError('User does not exist')
+        with open(filename, 'w', newline='') as csvfile:
+            fieldnames = ['date', 'category', 'amount', 'currency', 'type']
+            writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+            writer.writeheader()
+            for transaction in self.transactions[username]:
+                writer.writerow(transaction)
