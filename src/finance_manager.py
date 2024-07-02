@@ -136,3 +136,17 @@ class FinanceManager:
             writer.writeheader()
             for transaction in self.transactions[username]:
                 writer.writerow(transaction)
+
+    def get_spending_by_category(self, username):
+        if username not in self.transactions:
+            raise ValueError('User does not exist')
+        spending_by_category = {}
+        for transaction in self.transactions[username]:
+            if transaction['type'] == 'Expense':
+                category = transaction['category']
+                amount = transaction['amount']
+                if category in spending_by_category:
+                    spending_by_category[category] += amount
+                else:
+                    spending_by_category[category] = amount
+        return spending_by_category

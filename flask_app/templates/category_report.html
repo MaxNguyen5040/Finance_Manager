@@ -1,0 +1,30 @@
+<!-- flask_app/templates/category_report.html -->
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Category Report</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <h1>Category-Based Spending Report</h1>
+    <a href="{{ url_for('index') }}" class="btn">Back to Dashboard</a>
+    <table>
+        <thead>
+            <tr>
+                <th>Category</th>
+                <th>Amount</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for category, amount in spending_by_category.items() %}
+            <tr>
+                <td>{{ category }}</td>
+                <td>{{ amount }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

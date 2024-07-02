@@ -156,3 +156,14 @@ def export_transactions():
     except ValueError as e:
         flash(str(e))
         return redirect(url_for('index'))
+    
+@app.route('/category-report')
+@login_required
+def category_report():
+    username = session['username']
+    try:
+        spending_by_category = manager.get_spending_by_category(username)
+        return render_template('category_report.html', spending_by_category=spending_by_category)
+    except ValueError as e:
+        flash(str(e))
+        return redirect(url_for('index'))
