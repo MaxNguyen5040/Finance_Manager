@@ -20,6 +20,30 @@
         <input type="text" name="currency" placeholder="Currency (e.g., USD)" required>
         <button type="submit">Add Transaction</button>
     </form>
+    <form action="{{ url_for('index') }}" method="POST" class="filter-form">
+        <input type="date" name="start_date" placeholder="Start Date">
+        <input type="date" name="end_date" placeholder="End Date">
+        <input type="text" name="category" placeholder="Category">
+        <select name="type">
+            <option value="">All</option>
+            <option value="Income">Income</option>
+            <option value="Expense">Expense</option>
+        </select>
+        <button type="submit">Filter</button>
+    </form>
+    <form action="{{ url_for('sort_transactions') }}" method="POST" class="sort-form">
+        <select name="sort_by">
+            <option value="date">Date</option>
+            <option value="category">Category</option>
+            <option value="amount">Amount</option>
+            <option value="type">Type</option>
+        </select>
+        <select name="ascending">
+            <option value="true">Ascending</option>
+            <option value="false">Descending</option>
+        </select>
+        <button type="submit">Sort</button>
+    </form>
     <h2>Transactions</h2>
     <table>
         <thead>

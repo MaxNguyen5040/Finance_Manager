@@ -69,3 +69,29 @@ def login():
         else:
             flash('Invalid credentials!')
     return render_template('login.html')
+
+@app.route('/', methods=['GET', 'POST'])
+@login_required
+def index():
+    username = session['username']
+    manager.load_user_transactions(username)
+    if request.method == 'POST':
+        filter_criteria = {
+            'start_date': request.form.get('start_date'),
+            'end_date': request.form.get('end_date'),
+            'category': request.form.get('category'),
+            'type': request.form.get('type')
+        }
+        transactions = manager.filter_transactions(username, **filter_criteria)
+    else:
+        transactions = manager.get_transactions(username)
+    return render_template('index.html', transactions=transactions.to_dict(orient='records'))
+
+@app.route('/sort', methods=['POST'])
+@login_required
+def sort_transactions():
+    username = session['username']
+    by = request.form['sort_by']
+    ascending = request.form.get('ascending', 'true').lower() == 'true'
+    transactions = manager.sort_transactions(username, by, ascending)
+    return render_template('index.html', transactions=transactions.to_dict(orient='records'))

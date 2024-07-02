@@ -77,3 +77,19 @@ class FinanceManager:
         plt.pie(categories.values(), labels=categories.keys(), autopct='%1.1f%%')
         plt.title('Expense Categories')
         plt.show()
+
+    def filter_transactions(self, username, start_date=None, end_date=None, category=None, type=None):
+        df = self.transactions.get(username, pd.DataFrame(columns=['date', 'category', 'amount', 'type', 'currency']))
+        if start_date:
+            df = df[df['date'] >= start_date]
+        if end_date:
+            df = df[df['date'] <= end_date]
+        if category:
+            df = df[df['category'] == category]
+        if type:
+            df = df[df['type'] == type]
+        return df
+
+    def sort_transactions(self, username, by, ascending=True):
+        df = self.transactions.get(username, pd.DataFrame(columns=['date', 'category', 'amount', 'type', 'currency']))
+        return df.sort_values(by=by, ascending=ascending)
