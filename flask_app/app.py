@@ -4,7 +4,15 @@ from flask import session
 import io
 import base64
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
+from flask_mail import Mail, Message
+
 user_manager = UserManager('data/users.csv')
+app.config['MAIL_SERVER'] = 'smtp.example.com'
+app.config['MAIL_PORT'] = 587
+app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USERNAME'] = 'your_email@example.com'
+app.config['MAIL_PASSWORD'] = 'your_password'
+mail = Mail(app)
 
 def login_required(f):
     @wraps(f)
@@ -118,13 +126,24 @@ def register():
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
+
+        if not username or not password:
+            flash('Username and password are required!')
+            return redirect(url_for('register'))
+
         try:
             user_manager.add_user(username, password)
             flash('Registration successful! Please log in.')
+            send_email(
+                'Welcome to Finance Manager',
+                [username],
+                'Thank you for registering with Finance Manager!'
+            )
             return redirect(url_for('login'))
         except ValueError as e:
             flash(str(e))
     return render_template('register.html')
+
 
 @app.route('/reset-password', methods=['GET', 'POST'])
 def reset_password():
@@ -167,3 +186,8 @@ def category_report():
     except ValueError as e:
         flash(str(e))
         return redirect(url_for('index'))
+    
+def send_email(subject, recipients, body):
+    msg = Message(subject, sender=app.config['MAIL_USERNAME'], recipients=recipients)
+    msg.body = body
+    mail.send(msg)
