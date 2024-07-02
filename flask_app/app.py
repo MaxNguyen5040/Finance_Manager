@@ -95,3 +95,29 @@ def sort_transactions():
     ascending = request.form.get('ascending', 'true').lower() == 'true'
     transactions = manager.sort_transactions(username, by, ascending)
     return render_template('index.html', transactions=transactions.to_dict(orient='records'))
+
+@app.route('/plot/expense-trend')
+@login_required
+def plot_expense_trend():
+    username = session['username']
+    fig = manager.plot_expense_trend(username)
+    if fig:
+        output = io.BytesIO()
+        FigureCanvas(fig).print_png(output)
+        return base64.b64encode(output.getvalue()).decode('utf8')
+    else:
+        flash('No expense data to plot.')
+        return redirect(url_for('index'))
+
+@app.route('/plot/income-trend')
+@login_required
+def plot_income_trend():
+    username = session['username']
+    fig = manager.plot_income_trend(username)
+    if fig:
+        output = io.BytesIO()
+        FigureCanvas(fig).print_png(output)
+        return base64.b64encode(output.getvalue()).decode('utf8')
+    else:
+        flash('No income data to plot.')
+        return redirect(url_for('index'))

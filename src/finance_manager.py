@@ -7,7 +7,8 @@ import matplotlib.pyplot as plt
 import logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 import pandas as pd
-
+import matplotlib.pyplot as plt
+import seaborn as sns
 
 class InvalidTransactionTypeError(Exception):
     pass
@@ -93,3 +94,35 @@ class FinanceManager:
     def sort_transactions(self, username, by, ascending=True):
         df = self.transactions.get(username, pd.DataFrame(columns=['date', 'category', 'amount', 'type', 'currency']))
         return df.sort_values(by=by, ascending=ascending)
+    
+    def plot_expense_trend(self, username):
+        df = self.transactions.get(username, pd.DataFrame(columns=['date', 'category', 'amount', 'type', 'currency']))
+        df['date'] = pd.to_datetime(df['date'])
+        expense_df = df[df['type'] == 'Expense']
+        if expense_df.empty:
+            return None
+
+        plt.figure(figsize=(10, 6))
+        sns.lineplot(x='date', y='amount', data=expense_df)
+        plt.title('Expense Trend')
+        plt.xlabel('Date')
+        plt.ylabel('Amount')
+        plt.grid(True)
+        plt.tight_layout()
+        return plt.gcf()
+
+    def plot_income_trend(self, username):
+        df = self.transactions.get(username, pd.DataFrame(columns=['date', 'category', 'amount', 'type', 'currency']))
+        df['date'] = pd.to_datetime(df['date'])
+        income_df = df[df['type'] == 'Income']
+        if income_df.empty:
+            return None
+
+        plt.figure(figsize=(10, 6))
+        sns.lineplot(x='date', y='amount', data=income_df)
+        plt.title('Income Trend')
+        plt.xlabel('Date')
+        plt.ylabel('Amount')
+        plt.grid(True)
+        plt.tight_layout()
+        return plt.gcf()
