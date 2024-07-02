@@ -1,4 +1,5 @@
 import json
+bcrypt = Bcrypt()
 
 class UserManager:
     def __init__(self, user_file):
@@ -19,11 +20,15 @@ class UserManager:
     def add_user(self, username, password):
         if username in self.users:
             raise ValueError('User already exists')
-        self.users[username] = {'password': password, 'settings': {}}
+        hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
+        self.users[username] = {'password': hashed_password, 'settings': {}}
         self.save_users()
 
     def authenticate_user(self, username, password):
-        return self.users.get(username, {}).get('password') == password
+        user = self.users.get(username)
+        if user and bcrypt.check_password_hash(user['password'], password):
+            return True
+        return False
 
     def get_user_settings(self, username):
         return self.users.get(username, {}).get('settings', {})

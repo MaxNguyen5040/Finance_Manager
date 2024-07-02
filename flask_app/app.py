@@ -7,22 +7,6 @@ from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 
 user_manager = UserManager('data/users.csv')
 
-@app.route('/plot/expense-trend')
-@login_required
-def plot_expense_trend():
-    fig = manager.plot_expense_trend()
-    output = io.BytesIO()
-    FigureCanvas(fig).print_png(output)
-    return base64.b64encode(output.getvalue()).decode('utf8')
-
-@app.route('/plot/income-trend')
-@login_required
-def plot_income_trend():
-    fig = manager.plot_income_trend()
-    output = io.BytesIO()
-    FigureCanvas(fig).print_png(output)
-    return base64.b64encode(output.getvalue()).decode('utf8')
-
 def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
@@ -46,16 +30,6 @@ def logout():
     session.pop('username', None)
     flash('Logged out successfully!')
     return redirect(url_for('login'))
-
-@app.route('/register', methods=['GET', 'POST'])
-def register():
-    if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
-        user_manager.create_user(username, password)
-        flash('User registered successfully!')
-        return redirect(url_for('login'))
-    return render_template('register.html')
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -139,3 +113,43 @@ def update_settings():
     user_manager.update_user_settings(username, settings)
     flash('Settings updated successfully!')
     return redirect(url_for('profile'))
+
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+
+        if not username or not password:
+            flash('Username and password are required!')
+            return redirect(url_for('register'))
+
+        try:
+            user_manager.add_user(username, password)
+            flash('Registration successful! Please log in.')
+            return redirect(url_for('login'))
+        except ValueError as e:
+            flash(str(e))
+    return render_template('register.html')
+
+@app.route('/add', methods=['POST'])
+@login_required
+def add_transaction():
+    username = session['username']
+    date = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    category = request.form['category']
+    amount = request.form['amount']
+    type = request.form['type']
+    currency = request.form['currency']
+
+    if not category or not amount or not type or not currency:
+        flash('All fields are required!')
+        return redirect(url_for('index'))
+
+    try:
+        amount = float(amount)
+        manager.add_transaction(username, date, category, amount, type, currency)
+        flash('Transaction added successfully!')
+    except ValueError as e:
+        flash(str(e))
+    return redirect(url_for('index'))
